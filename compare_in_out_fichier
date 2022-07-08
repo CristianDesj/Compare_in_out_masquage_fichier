@@ -1,0 +1,76 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[4]:
+
+
+# import OS module
+import os
+import pandas as pd
+import numpy as np
+import sys
+
+ 
+# Get the list of all files and directories
+path_in = r"C:\temp\comp_masque\in"
+path_out = r"C:\temp\comp_masque\out"
+
+dir_list_in = os.listdir(path_in)
+dir_list_out = os.listdir(path_out)
+
+#Verification steps
+print("Verification steps:")
+print("Step 1:")
+if(len(dir_list_in) >1 or len(dir_list_out)>1):
+    print("There are files in the IN folder and in the OUT folder.")
+print("Step 2:")
+if(len(dir_list_in) == len(dir_list_out)):
+    print("There are the same number of files in the IN and OUT folders.")
+print("Step 3:")
+if(dir_list_in == dir_list_out):
+    print("The files in the IN and OUT folders have the same documents.")
+else:
+    print(dir_list_in == dir_list_out)
+    sys.exit("Please cheek the file in the repertories IN and OUT .....")
+
+def comparation(in_file, out_file):
+    print("........")
+    print("Comparing: ",in_file)
+    
+    inD = os.path.join("C:/", "temp","comp_masque","in",in_file)
+    outD = os.path.join("C:/", "temp","comp_masque","out",out_file)
+    
+    df_IN = pd.read_csv(inD, sep = '|')
+    df_OUT = pd.read_csv(outD, sep = '|')
+    
+    compareValues = df_IN.values == df_OUT.values
+    cd = pd.DataFrame(compareValues)
+    
+    rows,cols = np.where(compareValues==False)
+    
+    for item in zip(rows,cols):
+        if (pd.isna(df_IN.iloc[item[0],item[1]])):
+                cd.iloc[item[0],item[1]] = " - "
+        else:
+            cd.iloc[item[0],item[1]] = "{} - {}".format(df_IN.iloc[item[0],item[1]],df_OUT.iloc[item[0],item[1]])
+    
+    # Create a Pandas Excel writer using XlsxWriter as the engine.
+    writer = pd.ExcelWriter(r'C:\temp\comp_masque\{}.xlsx'.format(in_file), engine='xlsxwriter')
+    
+    # Create some Pandas dataframes from some data.
+    df_IN.to_excel(writer, index = False,sheet_name="IN",header=True)
+    df_OUT.to_excel(writer, index = False,sheet_name="OUT",header=True)
+    cd.to_excel(writer, index = False,sheet_name="comparation",header=True)
+    
+    # Close the Pandas Excel writer and output the Excel file.
+    writer.save()
+
+    #print(df_IN)
+
+#
+if(dir_list_in ==dir_list_out):
+    for x in range(len(dir_list_in)):
+        comparation(dir_list_in[x],dir_list_out[x])
+
+print("........")
+print("end ejecution, thanks for fly with us, by :)")
